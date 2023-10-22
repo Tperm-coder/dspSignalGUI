@@ -104,15 +104,32 @@ class MyGUI(QMainWindow):
 
 
     def onTxtToDiscreteAndContinousClick(self):
-        self._showOpenDialog(True,True)
+        res = self._showOpenDialog()
+        
+        if (res == False) :
+            return False;
+
+        x,y = res
+        self.signalHelper.drawGraph(x,y,True,True)
     
     def onTxtToDiscreteClick(self):
-        self._showOpenDialog(True,False)
+        res = self._showOpenDialog()
+        if (res == False) :
+            return False;
+
+        x,y = res
+        self.signalHelper.drawGraph(x,y,True,False)
     
     def onTxtToContinousClick(self):
-        self._showOpenDialog(False,True)
+        res = self._showOpenDialog()
+        if (res == False) :
+            return False;
+
+        x,y = res
+        self.signalHelper.drawGraph(x,y,False,True)
+  
  
-    def _showOpenDialog(self,isDiscrete = True ,isContinous = True):
+    def _showOpenDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
 
@@ -126,9 +143,8 @@ class MyGUI(QMainWindow):
 
         if (not state) :
             return False
-        
-        self.signalHelper.drawGraph(x,y,isDiscrete,isContinous)
-  
+
+        return (x,y);
 
 
 
