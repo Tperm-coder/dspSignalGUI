@@ -13,7 +13,7 @@ class SignalHelper:
         x = np.array(x)
         y = np.array(y)
 
-        x_smooth = np.linspace(x.min(), x.max(), 100)
+        x_smooth = np.linspace(x.min(), x.max(), 500)
         y_smooth = np.interp(x_smooth, x, y)
 
         if isDiscrete :
@@ -30,7 +30,8 @@ class SignalHelper:
             phase += 90.0
 
         x = np.linspace(0, 2 * np.pi, 1000)  
-        # y = amplitude * np.sin(2 * np.pi * frequency + phase)
+        print(x)
+        print(frequency)
         y = amplitude * np.sin(2 * np.pi * frequency * x + phase)
 
         return (x,y)
@@ -96,7 +97,7 @@ class MyGUI(QMainWindow):
             self._showPopUp("Alias detected","The sampling frequency must be at least twice the signal frequency")
             return
 
-        x,y = self.signalHelper.buildWave(float(amplitude),float( (sampleFreq/(2*analogFreq))) ,float(phaseShift),float(isCos))
+        x,y = self.signalHelper.buildWave(float(amplitude),float( ((analogFreq))) ,float(phaseShift),float(isCos))
         
         
         self.signalHelper.drawGraph(x,y,True,True)
