@@ -178,6 +178,7 @@ class MyGUI(QMainWindow):
         x,y = res
         self.signalHelper.drawGraph(x,y,False,True)
 
+
     def _showOpenDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
@@ -202,7 +203,7 @@ class MyGUI(QMainWindow):
         else:
             return None
 
-   
+
 
 
 
