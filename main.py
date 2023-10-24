@@ -115,7 +115,7 @@ class MyGUI(QMainWindow):
     def onTxtToDiscreteClick(self):
         res = self._showOpenDialog()
         if (res == False) :
-            return False;
+            return False; 
 
         x,y = res
         self.signalHelper.drawGraph(x,y,True,False)
@@ -127,24 +127,32 @@ class MyGUI(QMainWindow):
 
         x,y = res
         self.signalHelper.drawGraph(x,y,False,True)
-  
- 
+
     def _showOpenDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
+        options |= QFileDialog.ExistingFiles  # Allow selecting multiple files
 
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt)", options=options)
+        fileDialog = QFileDialog(self)
+        fileDialog.setFileMode(QFileDialog.ExistingFiles)
+        fileDialog.setNameFilter("Text Files (*.txt)")
 
-        if not fileName:
-            self.showPopUp("Invalid format","Invalid input file format")
-            return False
+        if fileDialog.exec_():
+            fileNames = fileDialog.selectedFiles()
+            data = []
 
-        state,x,y = self.signalHelper.loadTxtContent(fileName)
+            for fileName in fileNames:
+                state, x, y = self.signalHelper.loadTxtContent(fileName)
+                if state:
+                    data.append((x, y))
+                else:
+                    self.showPopUp("Invalid format", f"Invalid input file format for {fileName}")
 
-        if (not state) :
-            return False
+            return data
+        else:
+            return None
 
-        return (x,y);
+   
 
 
 
