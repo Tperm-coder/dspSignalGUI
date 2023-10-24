@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
-    <height>234</height>
+    <width>774</width>
+    <height>521</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +20,8 @@
    <widget class="QLabel" name="ampInpLabel">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
+      <x>170</x>
+      <y>20</y>
       <width>81</width>
       <height>31</height>
      </rect>
@@ -38,9 +41,9 @@
    <widget class="QDoubleSpinBox" name="ampInp">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>81</width>
+      <x>170</x>
+      <y>50</y>
+      <width>151</width>
       <height>22</height>
      </rect>
     </property>
@@ -57,9 +60,9 @@
    <widget class="QDoubleSpinBox" name="anaInp">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>110</y>
-      <width>141</width>
+      <x>170</x>
+      <y>120</y>
+      <width>161</width>
       <height>22</height>
      </rect>
     </property>
@@ -73,8 +76,8 @@
    <widget class="QLabel" name="anaInpLabel">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>80</y>
+      <x>170</x>
+      <y>90</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -94,8 +97,8 @@
    <widget class="QLabel" name="phaseInpLabel">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>10</y>
+      <x>350</x>
+      <y>20</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -115,9 +118,9 @@
    <widget class="QDoubleSpinBox" name="phaseInp">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>40</y>
-      <width>91</width>
+      <x>350</x>
+      <y>50</y>
+      <width>161</width>
       <height>22</height>
      </rect>
     </property>
@@ -131,8 +134,8 @@
    <widget class="QPushButton" name="drawBtn">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>170</y>
+      <x>360</x>
+      <y>160</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -144,8 +147,8 @@
    <widget class="QLabel" name="sampInpLabel">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>80</y>
+      <x>350</x>
+      <y>90</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -165,8 +168,8 @@
    <widget class="QDoubleSpinBox" name="sampInp">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>110</y>
+      <x>350</x>
+      <y>120</y>
       <width>161</width>
       <height>22</height>
      </rect>
@@ -181,8 +184,8 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>10</y>
+      <x>530</x>
+      <y>50</y>
       <width>120</width>
       <height>61</height>
      </rect>
@@ -220,19 +223,378 @@
      </property>
     </widget>
    </widget>
+   <widget class="QComboBox" name="opComboBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>280</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <item>
+     <property name="text">
+      <string>Add</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Normalize</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Shift</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Subtract</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Square</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Multiply</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>comulate</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>180</y>
+      <width>871</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Adobe Fan Heiti Std B</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Draw Wave</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>221</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Adobe Fan Heiti Std B</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Perform operations on waves</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>250</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Operation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="opImportBtn">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>450</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Import</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="opDraw">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>450</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Draw</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>350</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Imported waves names</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="opFileNamesTxt">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>380</y>
+      <width>751</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="mulGroup">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>230</y>
+      <width>201</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QDoubleSpinBox" name="opInpField">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>50</y>
+       <width>171</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>20</number>
+     </property>
+     <property name="maximum">
+      <double>1000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::DefaultStepType</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="ampInpLabel_6">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>20</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="opClrBtn">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>350</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>clear</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="normGroup">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>230</y>
+      <width>411</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QDoubleSpinBox" name="opInpFrom">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>50</y>
+       <width>171</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>20</number>
+     </property>
+     <property name="minimum">
+      <double>-1000000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::DefaultStepType</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="ampInpLabel_7">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>20</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>From</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="opInpTo">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>50</y>
+       <width>171</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>20</number>
+     </property>
+     <property name="minimum">
+      <double>-1000000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::DefaultStepType</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="ampInpLabel_8">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>20</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>To</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>361</width>
+     <width>774</width>
      <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuimport">
     <property name="title">
-     <string>import</string>
+     <string>import and draw</string>
     </property>
     <addaction name="txtDis"/>
     <addaction name="txtCon"/>

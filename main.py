@@ -7,22 +7,45 @@ class SignalHelper:
     def __init__(self):
         pass
 
-    def drawGraph(self,x,y,isDiscrete = True ,isContinous = True):
-        plt.show()
+    def drawGraphs(self, graphs, isDiscrete=True, isContinuous=True):
+        if (len(graphs) == 1) :
+            x,y = graphs[0]
 
-        x = np.array(x)
-        y = np.array(y)
+            x = np.array(x)
+            y = np.array(y)
 
-        x_smooth = np.linspace(x.min(), x.max(), 500)
-        y_smooth = np.interp(x_smooth, x, y)
+            x_smooth = np.linspace(x.min(), x.max(), 500)
+            y_smooth = np.interp(x_smooth, x, y)
 
-        if isDiscrete :
-            plt.plot(x, y, 'ro', label='Data Points', linestyle='none') 
+            if isDiscrete:
+                plt.plot(x, y, 'ro', label='Data Points', linestyle='none')
 
-        if isContinous :
-            plt.plot(x_smooth, y_smooth, 'b-')
+            if isContinuous:
+                plt.plot(x_smooth, y_smooth)
 
-        plt.legend()
+        
+            plt.legend()
+            plt.show()
+            return
+
+        fig, axs = plt.subplots(len(graphs), 1, figsize=(8, 6))
+        
+        for i, (x, y) in enumerate(graphs):
+            x = np.array(x)
+            y = np.array(y)
+
+            x_smooth = np.linspace(x.min(), x.max(), 500)
+            y_smooth = np.interp(x_smooth, x, y)
+
+            if isDiscrete:
+                axs[i].plot(x, y, 'ro', label='Data Points', linestyle='none')
+
+            if isContinuous:
+                axs[i].plot(x_smooth, y_smooth)
+        
+            axs[i].legend()
+
+        plt.tight_layout()
         plt.show()
 
     def buildWave(self, amplitude=1.0, frequency=1.0, phase=0.0 , isCos = False):
@@ -30,8 +53,6 @@ class SignalHelper:
             phase += 90.0
 
         x = np.linspace(0, 2 * np.pi, 1000)  
-        print(x)
-        print(frequency)
         y = amplitude * np.sin(2 * np.pi * frequency * x + phase)
 
         return (x,y)
@@ -48,42 +69,84 @@ class SignalHelper:
             for i in range(len(x)) :
                 if str(x[i]) in new_signal :
                     if isAdd :
-                        new_signal[str(x[i])] += y[i]
+                        new_signal[str(x[i])] += float(y[i])
                     else :
-                        new_signal[str(x[i])] -= y[i]
+                        new_signal[str(x[i])] -= float(y[i])
                 else :
-                    new_signal[str(x[i])] = y[i]
+                    new_signal[str(x[i])] = float(y[i])
 
 
         x = []
         y = []
 
         for k, v in new_signal.items():
-            x.append(int(k))
+            x.append(int(float(k)))
             y.append(v)
 
         return (x,y)
 
+    def signal_scale(self,signal,scaler) :
+        x,y = signal
+
+        new_x = x.copy()
+        new_y = y.copy()
+
+        for i in range(len(new_x)) :
+            new_y[i] = float(new_y[i]) * float(scaler)
+        
+        return (new_x,new_y)
+
+    def signal_shift(self,signal,scaler) :
+        x,y = signal
+
+        new_x = x.copy()
+        new_y = y.copy()
+
+        for i in range(len(new_x)) :
+            new_y[i] = float(new_y[i]) + float(scaler)
+        
+        return (new_x,new_y)
+
+    def signal_square(self,signal) :
+        x,y = signal
+
+        new_x = x.copy()
+        new_y = y.copy()
+
+        for i in range(len(new_x)) :
+            new_y[i] = float(new_y[i]) * float(new_y[i])
+        
+        return (new_x,new_y)
+
     def signal_commulation(self,signal) :
         x,y = signal
 
-        for i in range(1,len(x)) :
-            y[i] += y[i-1]
+        new_x = x.copy()
+        new_y = y.copy()
+
+        for i in range(1,len(new_x)) :
+            new_y[i] = float(new_y[i])
+            new_y[i] += float(new_y[i-1])
         
-        return (x,y)
+        return (new_x,new_y)
 
     def normalize_signal(self, signal, new_min , new_max) :
         x,y = signal
 
-        curr_max = max(y)
-        curr_min = min(y)
+        new_x = x.copy()
+        new_y = y.copy()
 
-        normalize_func = lambda x : (((x-curr_min)/(curr_max-curr_min))*(new_max-new_min))+new_min
+        curr_max = max(new_y)
+        curr_min = min(new_y)
 
-        for i in range(len(y)) :
-            y[i] = normalize_func(y[i]);
+        normalize_func = lambda _x : (((_x-curr_min)/(curr_max-curr_min))*(new_max-new_min))+new_min
+
+        for i in range(len(new_y)) :
+            new_y[i] = normalize_func(new_y[i]);
         
-        return (x,y)
+        print("========>",y,"\n",new_y)
+        
+        return (new_x,new_y)
 
 
     def loadTxtContent(self,path) :
@@ -112,12 +175,48 @@ class SignalHelper:
 
 class MyGUI(QMainWindow):
 
+    #global data used across the class
+    globalData = dict({})
+
     def __init__(self):
         super(MyGUI,self).__init__()
         uic.loadUi("mainPage.ui",self)
-        self.show()
 
+        #global data
+        self.globalData = dict({
+            "opImportedFiles" : [],
+            "opImportedWaves" : [],
+            "ops" : {
+                "multiply" : "multiply",
+                "subtract" : "subtract",
+                "square" : "square",
+                "normalize" : "normalize",
+                "comulate" : "comulate",
+                "add" : "add",
+                "shift" : "shift"
+            },
+            "getOpsRefs" : {
+                "multiply" : lambda :  self.mulGroup,
+                "shift" :  lambda :  self.mulGroup,
+                "normalize" : lambda :  self.normGroup
+            },
+            "opsActions" : {
+                "shift" : lambda : self.mulGroup.setVisible(bool(True)),
+                "multiply" : lambda : self.mulGroup.setVisible(bool(True)),
+                "normalize" : lambda : self.normGroup.setVisible(bool(True))
+            },
+            "funcs" : {
+                
+            }
+        }) 
+
+        #init functions
+        self.show()
+        self.setOpsVisibilityState(False)
+
+        #class used to perform signal operations and logic
         self.signalHelper = SignalHelper()
+        self.mulGroup.setVisible(bool(False))
 
         #drop down options
         self.txtDis.triggered.connect(self.onTxtToDiscreteClick)
@@ -126,6 +225,92 @@ class MyGUI(QMainWindow):
 
         #draw button
         self.drawBtn.clicked.connect(self.onDrawBtnClick)
+
+
+        #Operations secion
+        self.opImportBtn.clicked.connect(self.onOpImportBtn)
+        self.opClrBtn.clicked.connect(self.onOpClrBtn)
+        self.opDraw.clicked.connect(self.onOpDraw)
+
+        self.opComboBox.currentIndexChanged.connect(self.onComboboxChanged)
+    
+    def onComboboxChanged(self) :
+        self.onOpClrBtn()
+        self.setOpsVisibilityState(False)
+
+        combo_box = self.findChild(QComboBox, "opComboBox")
+        if combo_box is None:
+            return
+
+        choosenOp = str(combo_box.currentText()).strip().lower()
+
+        if choosenOp in self.globalData["opsActions"] :
+            self.globalData["opsActions"][choosenOp]()
+
+    def onOpDraw(self) :
+        if (len(self.globalData["opImportedWaves"]) == 0) :
+            self._showPopUp("Warning" , "Please import files first")
+            return
+        
+        ops = self.globalData["ops"]
+        combo_box = self.findChild(QComboBox, "opComboBox")
+        choosenOp = str(combo_box.currentText()).strip().lower()
+
+        if choosenOp == ops["multiply"] : 
+            scaler = float(self.opInpField.text())
+            self.globalData["opImportedWaves"].append(self.signalHelper.signal_scale(self.globalData["opImportedWaves"][0],scaler))
+        
+        elif choosenOp == ops["add"] :
+            self.globalData["opImportedWaves"].append(self.signalHelper.add_subtract_signals(self.globalData["opImportedWaves"]))
+
+        elif choosenOp == ops["subtract"] :
+            self.globalData["opImportedWaves"].append(self.signalHelper.add_subtract_signals(self.globalData["opImportedWaves"],False))
+
+        elif choosenOp == ops["comulate"] :
+            self.globalData["opImportedWaves"].append(self.signalHelper.signal_commulation(self.globalData["opImportedWaves"][0]))
+        
+        elif choosenOp == ops["square"] :
+            self.globalData["opImportedWaves"].append(self.signalHelper.signal_square(self.globalData["opImportedWaves"][0]))
+
+        elif choosenOp == ops["shift"] :
+            scaler = float(self.opInpField.text())
+            self.globalData["opImportedWaves"].append(self.signalHelper.signal_shift(self.globalData["opImportedWaves"][0],scaler))
+
+        elif choosenOp == ops["normalize"] :
+            _from = float(self.opInpFrom.text())
+            _to   = float(self.opInpTo.text()) 
+
+            if (_from > _to) :
+                self._showPopUp("Warning" , "From can't be larger than To")
+                return
+            self.globalData["opImportedWaves"].append(self.signalHelper.normalize_signal(self.globalData["opImportedWaves"][0],_from,_to))
+
+        
+
+
+        
+        self.signalHelper.drawGraphs(self.globalData["opImportedWaves"],True,True)
+
+    def onOpClrBtn(self) :
+        self.globalData["opImportedWaves"] = []
+        self.globalData["opImportedFiles"] = []
+        self.opFileNamesTxt.setPlainText("")
+
+
+    def setOpsVisibilityState(self,state) :
+        state = bool(state)
+
+        for key in self.globalData["ops"]:
+            if (key in self.globalData["getOpsRefs"]) :
+                self.globalData["getOpsRefs"][str(key)]().setVisible(state)
+
+
+    def onOpImportBtn(self) :
+        res = self._showOpenDialog()
+        self.opFileNamesTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
+        self.globalData["opImportedWaves"] = res
+
+        
 
     def _showPopUp(self,title,msgTxt) :
         msg = QMessageBox()
@@ -150,33 +335,38 @@ class MyGUI(QMainWindow):
         x,y = self.signalHelper.buildWave(float(amplitude),float( ((analogFreq))) ,float(phaseShift),float(isCos))
         
         
-        self.signalHelper.drawGraph(x,y,True,True)
+        self.signalHelper.drawGraphs([x],[y],True,True)
 
 
     def onTxtToDiscreteAndContinousClick(self):
         res = self._showOpenDialog()
+        res = res[0]
         
         if (res == False) :
             return False;
 
         x,y = res
-        self.signalHelper.drawGraph(x,y,True,True)
+        self.signalHelper.drawGraphs( [(x,y)] ,True,True)
     
     def onTxtToDiscreteClick(self):
         res = self._showOpenDialog()
+        res = res[0]
+
         if (res == False) :
             return False; 
 
         x,y = res
-        self.signalHelper.drawGraph(x,y,True,False)
+        self.signalHelper.drawGraphs([(x,y)],True,False)
     
     def onTxtToContinousClick(self):
         res = self._showOpenDialog()
+        res = res[0]
+
         if (res == False) :
             return False;
 
         x,y = res
-        self.signalHelper.drawGraph(x,y,False,True)
+        self.signalHelper.drawGraphs([(x,y)][x],[y],False,True)
 
 
     def _showOpenDialog(self):
@@ -196,12 +386,13 @@ class MyGUI(QMainWindow):
                 state, x, y = self.signalHelper.loadTxtContent(fileName)
                 if state:
                     data.append((x, y))
+                    self.globalData["opImportedFiles"].append(fileName.split('/').pop())
                 else:
-                    self.showPopUp("Invalid format", f"Invalid input file format for {fileName}")
-
+                    self._showPopUp("Invalid format", f"Invalid input file format for {fileName}")
             return data
         else:
-            return None
+            self._showPopUp("Error", "An error occurred while importing files")
+            return
 
 
 
