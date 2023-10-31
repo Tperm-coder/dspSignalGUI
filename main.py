@@ -48,23 +48,6 @@ class SignalHelper:
         plt.tight_layout()
         plt.show()
 
-    def quantize_signal(signal, num,levels=True):
-        num_levels= 1
-        if levels:
-            num_levels=num
-        else :
-            num_levels = pow(2,num)
-
-        signal_min = min(signal)
-        signal_max = max(signal)
-        step_size = (signal_max - signal_min) / (num_levels - 1)
-
-        quantized_signal = np.round((signal - signal_min) / step_size) * step_size + signal_min
-
-        quantization_error = signal - quantized_signal
-
-        return quantized_signal, quantization_error
-
     def buildWave(self, amplitude=1.0, frequency=1.0, phase=0.0 , isCos = False):
         if isCos : 
             phase += 90.0
@@ -165,6 +148,38 @@ class SignalHelper:
         
         return (new_x,new_y)
 
+    def quantize_signal(self,signal, num, levels=True):
+        num_levels = 1
+        if levels:
+            num_levels = int(num)
+        else:
+            num_levels = pow(2, int(num))
+
+        x_min,x_max = min(signal[0][0]), max(signal[0][0])
+        y_min , y_max = min(signal[0][1]),max(signal[0][1])
+        x_step_size = (x_max - x_min) / (num_levels - 1)
+        y_step_size = (y_max - y_min) / (num_levels - 1)
+
+        quant_x=[]
+        for x in signal[0][0]:
+            quant_x.append(((x-x_min)/x_step_size)*x_step_size+x_min)
+        quant_y = []
+        for y in signal[0][1]:
+            quant_y.append(((y-y_min)/y_step_size)*y_step_size+y_min)
+
+        error_x = []
+        for i in range(len(signal[0][0])):
+            error_x.append(signal[0][0][i] - quant_x[i])
+        error_y = []
+        for i in range(len(signal[0][1])):
+            error_y.append(signal[0][1][i] - quant_x[i])
+        tuple=(quant_x,quant_y)
+        arr = []
+        arr.append(signal[0])
+        arr.append(tuple)
+        # ----------------------------- Ekteb Hena ----------------------------
+        self.drawGraphs(arr)
+        return (quant_x,quant_y)
 
     def loadTxtContent(self,path) :
         try :
@@ -198,7 +213,7 @@ class MyGUI(QMainWindow):
     def __init__(self):
         super(MyGUI,self).__init__()
         uic.loadUi("mainPage.ui",self)
-
+        self.quantData = 0
         #global data
         self.globalData = dict({
             "opImportedFiles" : [],
@@ -210,8 +225,7 @@ class MyGUI(QMainWindow):
                 "normalize" : "normalize",
                 "comulate" : "comulate",
                 "add" : "add",
-                "shift" : "shift",
-                "quantize":"quantize"
+                "shift" : "shift"
             },
             "getOpsRefs" : {
                 "multiply" : lambda :  self.mulGroup,
@@ -244,16 +258,17 @@ class MyGUI(QMainWindow):
         #draw button
         self.drawBtn.clicked.connect(self.onDrawBtnClick)
 
-        # quantization Section
-        # self.quantize_button.clicked.connect(self.onQuantBtn)
 
-        #Operations section
+        #Operations secion
         self.opImportBtn.clicked.connect(self.onOpImportBtn)
         self.opClrBtn.clicked.connect(self.onOpClrBtn)
         self.opDraw.clicked.connect(self.onOpDraw)
 
         self.opComboBox.currentIndexChanged.connect(self.onComboboxChanged)
-    
+
+        # Quantization Seciton
+        self.opImportBtn_2.clicked.connect(self.onQuantImportBtn)
+        self.quantizeBtn.clicked.connect(self.onQuantizeBtn)
     def onComboboxChanged(self) :
         self.onOpClrBtn()
         self.setOpsVisibilityState(False)
@@ -295,8 +310,6 @@ class MyGUI(QMainWindow):
         elif choosenOp == ops["shift"] :
             scaler = float(self.opInpField.text())
             self.globalData["opImportedWaves"].append(self.signalHelper.signal_shift(self.globalData["opImportedWaves"][0],scaler))
-        elif choosenOp == ops["quantize"] :
-            self.globalData["opImportedWaves"].append(self.signalHelper.quantize_signal(self.globalData["opImportedWaves"][0]))
 
         elif choosenOp == ops["normalize"] :
             _from = float(self.opInpFrom.text())
@@ -332,7 +345,15 @@ class MyGUI(QMainWindow):
         self.opFileNamesTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
         self.globalData["opImportedWaves"] = res
 
-        
+    def onQuantImportBtn(self) :
+        res = self._showOpenDialog()
+        self.quantData = res
+
+    def onQuantizeBtn(self):
+        text = self.quantize_field.text()
+        levels = self.isLevel.isChecked()
+        self.signalHelper.quantize_signal(self.quantData,text,levels)
+
 
     def _showPopUp(self,title,msgTxt) :
         msg = QMessageBox()
