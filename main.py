@@ -2,10 +2,109 @@ import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import numpy as np
+import math
+
+
+class CustomTest : 
+    def __init__(self):
+        pass
+    def quatizationByLevel(self,file_name,Your_IntervalIndices,Your_EncodedValues,Your_QuantizedValues,Your_SampledError):
+        expectedIntervalIndices=[]
+        expectedEncodedValues=[]
+        expectedQuantizedValues=[]
+        expectedSampledError=[]
+        print(file_name)
+        with open(file_name, 'r') as f:
+            line = f.readline()
+            line = f.readline()
+            line = f.readline()
+            line = f.readline()
+            while line:
+                # process line
+                L=line.strip()
+                print(line)
+                if len(L.split(' '))==4:
+                    L=line.split(' ')
+                    V1=int(L[0])
+                    V2=str(L[1])
+                    V3=float(L[2])
+                    V4=float(L[3])
+                    expectedIntervalIndices.append(V1)
+                    expectedEncodedValues.append(V2)
+                    expectedQuantizedValues.append(V3)
+                    expectedSampledError.append(V4)
+                    line = f.readline()
+                else:
+                    break
+        print(expectedIntervalIndices,expectedEncodedValues,expectedQuantizedValues,expectedSampledError)
+        if(len(Your_IntervalIndices)!=len(expectedIntervalIndices)
+        or len(Your_EncodedValues)!=len(expectedEncodedValues)
+        or len(Your_QuantizedValues)!=len(expectedQuantizedValues)
+        or len(Your_SampledError)!=len(expectedSampledError)):
+            print("QuantizationTest2 Test case failed, your signal have different length from the expected one")
+            return
+        for i in range(len(Your_IntervalIndices)):
+            if(Your_IntervalIndices[i]!=expectedIntervalIndices[i]):
+                print("QuantizationTest2 Test case failed, your signal have different indicies from the expected one") 
+                return
+        for i in range(len(Your_EncodedValues)):
+            if(Your_EncodedValues[i]!=expectedEncodedValues[i]):
+                print("QuantizationTest2 Test case failed, your EncodedValues have different EncodedValues from the expected one") 
+                return
+            
+        for i in range(len(expectedQuantizedValues)):
+            if abs(Your_QuantizedValues[i] - expectedQuantizedValues[i]) < 0.01:
+                continue
+            else:
+                print("QuantizationTest2 Test case failed, your QuantizedValues have different values from the expected one") 
+                return
+        for i in range(len(expectedSampledError)):
+            if abs(Your_SampledError[i] - expectedSampledError[i]) < 0.01:
+                continue
+            else:
+                print("QuantizationTest2 Test case failed, your SampledError have different values from the expected one") 
+                return
+        print("QuantizationTest2 Test case passed successfully")
 
 class SignalHelper:
     def __init__(self):
         pass
+
+    def signalQuatization(self,_values,quantizationLevels) :
+        print(_values)
+        values = _values[0][1]
+        minValue = min(values)
+        maxValue = max(values)
+
+        segmentSize = (maxValue-minValue)/quantizationLevels
+        segmentsValues = []
+
+        i = minValue
+        while i < maxValue :
+            segmentsValues.append((i,i+segmentSize))
+            i += segmentSize
+
+        quantizedValues = []
+        for value in values :
+
+            segmentIndex = -1
+            for i in range(len(segmentsValues)) :
+                if value >= segmentsValues[i][0] and value <= segmentsValues[i][1] :
+                    segmentIndex = i
+                    break
+
+            quantizedValue = (segmentsValues[segmentIndex][0] + segmentsValues[segmentIndex][1])/2
+            quantizedValue = math.floor(quantizedValue*1000) / 1000
+
+            quantizedValues.append({
+            "index" : segmentIndex,
+            "originalValue" : value,
+            "quantizedValue" : round(quantizedValue,3),
+            "error" : round(round(quantizedValue,3) - round(value,3),3)
+            })
+        
+        return quantizedValues
+
 
     def drawGraphs(self, graphs, isDiscrete=True, isContinuous=True):
         if (len(graphs) == 1) :
@@ -184,6 +283,7 @@ class MyGUI(QMainWindow):
 
         #global data
         self.globalData = dict({
+            "qntImportedFiles" : [],
             "opImportedFiles" : [],
             "opImportedWaves" : [],
             "ops" : {
@@ -207,22 +307,24 @@ class MyGUI(QMainWindow):
             },
             "funcs" : {
                 
-            }
+            },
+            "test" : {}
         }) 
 
         #init functions
         self.show()
         self.setOpsVisibilityState(False)
-
-        #class used to perform signal operations and logic
-        self.signalHelper = SignalHelper()
         self.mulGroup.setVisible(bool(False))
+
+        self.signalHelper = SignalHelper()
+        self.customTest = CustomTest()
 
         #drop down options
         self.txtDis.triggered.connect(self.onTxtToDiscreteClick)
         self.txtCon.triggered.connect(self.onTxtToContinousClick)
         self.txtDisCon.triggered.connect(self.onTxtToDiscreteAndContinousClick)
-
+        self.quatizationLevels.triggered.connect(self.qntLvlCustomTest)
+        self.quantizationBits.triggered.connect(self.qntBitsCustomTest) 
         #draw button
         self.drawBtn.clicked.connect(self.onDrawBtnClick)
 
@@ -231,8 +333,100 @@ class MyGUI(QMainWindow):
         self.opImportBtn.clicked.connect(self.onOpImportBtn)
         self.opClrBtn.clicked.connect(self.onOpClrBtn)
         self.opDraw.clicked.connect(self.onOpDraw)
-
         self.opComboBox.currentIndexChanged.connect(self.onComboboxChanged)
+
+        #quantization section
+        self.qntBtn.clicked.connect(self.onQntBtnClicked)
+        self.qntImportBtn.clicked.connect(self.onImportBtnClicked)
+
+    def qntBitsCustomTest(self) :
+        print("File must be in the same directory")
+        print(self.globalData["test"])
+
+        res = self._showOpenDialog()
+        fileName = self.globalData["opImportedFiles"][0]
+        indexes = self.globalData["test"]["indexes"]
+        binaries = self.globalData["test"]["binaries"]
+        values = self.globalData["test"]["values"]
+        errors = self.globalData["test"]["errors"]
+        self.customTest.quatizationByLevel(fileName,indexes,binaries,values,errors)
+
+    def qntLvlCustomTest(self) :
+        print("File must be in the same directory")
+        print(self.globalData["test"])
+
+        res = self._showOpenDialog()
+        fileName = self.globalData["opImportedFiles"][0]
+        indexes = self.globalData["test"]["indexes"]
+        binaries = self.globalData["test"]["binaries"]
+        values = self.globalData["test"]["values"]
+        errors = self.globalData["test"]["errors"]
+        self.customTest.quatizationByLevel(fileName,indexes,binaries,values,errors)
+
+    def onQntBtnClicked(self) :
+        if (len(self.globalData["qntImportedFiles"]) == 0) :
+            self._showPopUp("Warning" , "Please import files first")
+            return
+            
+        isLvls = bool(self.qntLvlsOp.isChecked())
+        isBits = bool(self.qntBitsOp.isChecked())
+        levels  = float(self.qntLvls.text())
+        quatizedValues = self.signalHelper.signalQuatization(self.globalData["qntImportedFiles"],levels)
+        x = []
+        y = []
+        j = 0
+        for i in quatizedValues:
+            x.append(j)
+            j += 1
+            y.append(i["quantizedValue"])
+        
+
+        string = "";
+        indexes = []
+        binaries = []
+        values = []
+        errors = []
+        if isLvls :
+            length = math.ceil(math.log2(levels))
+            for i in quatizedValues :
+                binStr = str("{0:b}".format((i["index"])))
+                while(len(binStr) < length) :
+                    binStr = '0'+binStr 
+
+                indexes.append(int(i["index"])+1)
+                values.append((i["quantizedValue"]))
+                binaries.append(binStr)
+                errors.append(i["error"])
+
+                string += str(int(i["index"])+1) + " " + str(binStr) 
+                string += " " + str(i["quantizedValue"]) + " " + str(i["error"]) + '\n'
+
+        if isBits :
+            length = math.ceil(math.log2(levels))
+            for i in quatizedValues :
+                binStr = str("{0:b}".format((i["index"])))
+                while(len(binStr) < length) :
+                    binStr = '0'+binStr 
+
+                values.append((i["quantizedValue"]))
+                binaries.append(binStr)
+                string += str(binStr) + " " + str(i["quantizedValue"]) + '\n'
+
+        self.globalData["test"] = {
+            "indexes" : indexes,
+            "values" : values,
+            "binaries" : binaries,
+            "errors" : errors
+        }
+        print(self.globalData["test"])
+        self.qntOutTxt.setPlainText(string)
+        self.signalHelper.drawGraphs([(x,y)],True,False)
+
+    def onImportBtnClicked(self) :
+        self.qntFileTxt.setPlainText("")
+        res = self._showOpenDialog()
+        self.qntFileTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
+        self.globalData["qntImportedFiles"] = res
     
     def onComboboxChanged(self) :
         self.onOpClrBtn()
@@ -296,7 +490,6 @@ class MyGUI(QMainWindow):
         self.globalData["opImportedFiles"] = []
         self.opFileNamesTxt.setPlainText("")
 
-
     def setOpsVisibilityState(self,state) :
         state = bool(state)
 
@@ -304,13 +497,10 @@ class MyGUI(QMainWindow):
             if (key in self.globalData["getOpsRefs"]) :
                 self.globalData["getOpsRefs"][str(key)]().setVisible(state)
 
-
     def onOpImportBtn(self) :
         res = self._showOpenDialog()
         self.opFileNamesTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
         self.globalData["opImportedWaves"] = res
-
-        
 
     def _showPopUp(self,title,msgTxt) :
         msg = QMessageBox()
@@ -336,7 +526,6 @@ class MyGUI(QMainWindow):
         
         
         self.signalHelper.drawGraphs([x],[y],True,True)
-
 
     def onTxtToDiscreteAndContinousClick(self):
         res = self._showOpenDialog()
@@ -368,7 +557,6 @@ class MyGUI(QMainWindow):
         x,y = res
         self.signalHelper.drawGraphs([(x,y)][x],[y],False,True)
 
-
     def _showOpenDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
@@ -386,7 +574,7 @@ class MyGUI(QMainWindow):
                 state, x, y = self.signalHelper.loadTxtContent(fileName)
                 if state:
                     data.append((x, y))
-                    self.globalData["opImportedFiles"].append(fileName.split('/').pop())
+                    self.globalData["opImportedFiles"].append(fileName)
                 else:
                     self._showPopUp("Invalid format", f"Invalid input file format for {fileName}")
             return data
