@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>774</width>
-    <height>521</height>
+    <height>589</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,9 +52,6 @@
     </property>
     <property name="maximum">
      <double>1000000.000000000000000</double>
-    </property>
-    <property name="stepType">
-     <enum>QAbstractSpinBox::DefaultStepType</enum>
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="anaInp">
@@ -272,6 +269,11 @@
       <string>comulate</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>Quantize</string>
+     </property>
+    </item>
    </widget>
    <widget class="Line" name="line">
     <property name="geometry">
@@ -354,8 +356,8 @@
    <widget class="QPushButton" name="opImportBtn">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>450</y>
+      <x>300</x>
+      <y>580</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -367,8 +369,8 @@
    <widget class="QPushButton" name="opDraw">
     <property name="geometry">
      <rect>
-      <x>370</x>
-      <y>450</y>
+      <x>390</x>
+      <y>580</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -381,7 +383,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
+      <y>400</y>
       <width>181</width>
       <height>31</height>
      </rect>
@@ -405,7 +407,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>380</y>
+      <y>430</y>
       <width>751</width>
       <height>41</height>
      </rect>
@@ -443,9 +445,6 @@
      </property>
      <property name="maximum">
       <double>1000000.000000000000000</double>
-     </property>
-     <property name="stepType">
-      <enum>QAbstractSpinBox::DefaultStepType</enum>
      </property>
     </widget>
     <widget class="QLabel" name="ampInpLabel_6">
@@ -513,9 +512,6 @@
      <property name="maximum">
       <double>1000000.000000000000000</double>
      </property>
-     <property name="stepType">
-      <enum>QAbstractSpinBox::DefaultStepType</enum>
-     </property>
     </widget>
     <widget class="QLabel" name="ampInpLabel_7">
      <property name="geometry">
@@ -556,9 +552,6 @@
      <property name="maximum">
       <double>1000000.000000000000000</double>
      </property>
-     <property name="stepType">
-      <enum>QAbstractSpinBox::DefaultStepType</enum>
-     </property>
     </widget>
     <widget class="QLabel" name="ampInpLabel_8">
      <property name="geometry">
@@ -581,6 +574,80 @@
       <string>To</string>
      </property>
     </widget>
+   </widget>
+   <widget class="Line" name="line_2">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>470</y>
+      <width>871</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="quantize_option">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>330</y>
+      <width>120</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Type</string>
+    </property>
+    <widget class="QRadioButton" name="level">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Levels</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="bit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bits</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QDoubleSpinBox" name="quant_text">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>340</y>
+      <width>171</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="minimum">
+     <double>0.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>1000000.000000000000000</double>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

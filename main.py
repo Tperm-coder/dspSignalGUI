@@ -48,6 +48,23 @@ class SignalHelper:
         plt.tight_layout()
         plt.show()
 
+    def quantize_signal(signal, num,levels=True):
+        num_levels= 1
+        if levels:
+            num_levels=num
+        else :
+            num_levels = pow(2,num)
+
+        signal_min = min(signal)
+        signal_max = max(signal)
+        step_size = (signal_max - signal_min) / (num_levels - 1)
+
+        quantized_signal = np.round((signal - signal_min) / step_size) * step_size + signal_min
+
+        quantization_error = signal - quantized_signal
+
+        return quantized_signal, quantization_error
+
     def buildWave(self, amplitude=1.0, frequency=1.0, phase=0.0 , isCos = False):
         if isCos : 
             phase += 90.0
@@ -193,7 +210,8 @@ class MyGUI(QMainWindow):
                 "normalize" : "normalize",
                 "comulate" : "comulate",
                 "add" : "add",
-                "shift" : "shift"
+                "shift" : "shift",
+                "quantize":"quantize"
             },
             "getOpsRefs" : {
                 "multiply" : lambda :  self.mulGroup,
@@ -226,8 +244,10 @@ class MyGUI(QMainWindow):
         #draw button
         self.drawBtn.clicked.connect(self.onDrawBtnClick)
 
+        # quantization Section
+        # self.quantize_button.clicked.connect(self.onQuantBtn)
 
-        #Operations secion
+        #Operations section
         self.opImportBtn.clicked.connect(self.onOpImportBtn)
         self.opClrBtn.clicked.connect(self.onOpClrBtn)
         self.opDraw.clicked.connect(self.onOpDraw)
@@ -275,6 +295,8 @@ class MyGUI(QMainWindow):
         elif choosenOp == ops["shift"] :
             scaler = float(self.opInpField.text())
             self.globalData["opImportedWaves"].append(self.signalHelper.signal_shift(self.globalData["opImportedWaves"][0],scaler))
+        elif choosenOp == ops["quantize"] :
+            self.globalData["opImportedWaves"].append(self.signalHelper.quantize_signal(self.globalData["opImportedWaves"][0]))
 
         elif choosenOp == ops["normalize"] :
             _from = float(self.opInpFrom.text())
