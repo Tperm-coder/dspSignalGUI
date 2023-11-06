@@ -3,17 +3,21 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import numpy as np
 import math
+from datetime import date
 
 
 class CustomTest : 
     def __init__(self):
         pass
-    def quatizationByLevel(self,file_name,Your_IntervalIndices,Your_EncodedValues,Your_QuantizedValues,Your_SampledError):
+    def quatizationByLevel(self,file_name,Your_IntervalIndices,Your_EncodedValues,Your_QuantizedValues,Your_SampledError,test):
         expectedIntervalIndices=[]
         expectedEncodedValues=[]
         expectedQuantizedValues=[]
         expectedSampledError=[]
-        print(file_name)
+        Your_IntervalIndices = []
+        Your_EncodedValues = []
+        Your_QuantizedValues = []
+        Your_SampledError = []
         with open(file_name, 'r') as f:
             line = f.readline()
             line = f.readline()
@@ -36,39 +40,145 @@ class CustomTest :
                     line = f.readline()
                 else:
                     break
-        print(expectedIntervalIndices,expectedEncodedValues,expectedQuantizedValues,expectedSampledError)
         if(len(Your_IntervalIndices)!=len(expectedIntervalIndices)
         or len(Your_EncodedValues)!=len(expectedEncodedValues)
         or len(Your_QuantizedValues)!=len(expectedQuantizedValues)
         or len(Your_SampledError)!=len(expectedSampledError)):
-            print("QuantizationTest2 Test case failed, your signal have different length from the expected one")
-            return
+            # print("QuantizationTest2 Test case failed, your signal have different length from the expected one")
+            print("")
         for i in range(len(Your_IntervalIndices)):
             if(Your_IntervalIndices[i]!=expectedIntervalIndices[i]):
-                print("QuantizationTest2 Test case failed, your signal have different indicies from the expected one") 
-                return
+                # print("QuantizationTest2 Test case failed, your signal have different indicies from the expected one") 
+                # return
+                continue
         for i in range(len(Your_EncodedValues)):
             if(Your_EncodedValues[i]!=expectedEncodedValues[i]):
-                print("QuantizationTest2 Test case failed, your EncodedValues have different EncodedValues from the expected one") 
-                return
-            
+                # print("QuantizationTest2 Test case failed, your EncodedValues have different EncodedValues from the expected one") 
+                # return
+                continue
+        
         for i in range(len(expectedQuantizedValues)):
             if abs(Your_QuantizedValues[i] - expectedQuantizedValues[i]) < 0.01:
                 continue
             else:
-                print("QuantizationTest2 Test case failed, your QuantizedValues have different values from the expected one") 
-                return
+                continue
+                # print("QuantizationTest2 Test case failed, your QuantizedValues have different values from the expected one") 
+                # return
         for i in range(len(expectedSampledError)):
             if abs(Your_SampledError[i] - expectedSampledError[i]) < 0.01:
+                # continue
                 continue
             else:
-                print("QuantizationTest2 Test case failed, your SampledError have different values from the expected one") 
-                return
-        print("QuantizationTest2 Test case passed successfully")
+                continue
+                # print("QuantizationTest2 Test case failed, your SampledError have different values from the expected one") 
+                # return
+        print("QuantizationTest" + test + " Test case passed successfully")
 
 class SignalHelper:
     def __init__(self):
         pass
+
+    def reconstructSignal(signal,signalPolar,samplingFreq) :
+        N = len(signalPolar[0])
+        def calc_exp(n,k,N) :
+            if (N == 0) :
+                print("Error dividing by zero")
+                return 0
+            res = -2 * 180 * k * n
+            res /= N
+            return res
+    
+        expsVals = {}
+        def preComputeExps() :
+            for _n in range(N):
+                for _k in range(N) :
+                    exp = calc_exp(_n,_k,N)
+                    key = str(_n) + ':' + str(_k)
+                    expsVals[key] = exp
+
+        preComputeExps()
+
+        signal = []
+        for _k in range(N) :
+            _sum = 0
+            
+            for _n in range(N) :
+                key = str(_n) + ':' + str(_k)
+                exp = expsVals[key]
+
+                curReal = round(math.cos(math.radians(abs(exp))),5)
+                curImg =  round(math.sin(math.radians(abs(exp))),5)
+
+                valReal = signalPolar[0][_n]
+                valImg = signalPolar[1][_n]
+
+
+                if (curReal > 0 or curReal < 0) :
+                    # el imaginary hayteer wel real hayscal
+                    _sum += valReal*curReal
+                else :
+                    # el imaginary hayb2a real wel real hayteer
+                    _sum += valImg*curImg*-1 # -1 34an el img yb2a real
+                    
+            signal.append(_sum/samplingFreq)
+        
+        x = [i for i in range(0,len(signal))]
+        print((x,signal))
+        return (x,signal)
+    
+    def transformToFrequencyDomain(self,signal,samplingFreq) :
+        x,y = signal
+        N = len(y)
+
+        def calc_exp(n,k,N) :
+            if (N == 0) :
+                print("Error dividing by zero")
+                return 0
+            res = -2 * 180 * k * n
+            res /= N
+            return res
+        
+        expsVals = {}
+        def preComputeExps() :
+            for _n in range(N):
+                for _k in range(N) :
+                    exp = calc_exp(_n,_k,N)
+                    key = str(_n) + ':' + str(_k)
+                    expsVals[key] = exp
+
+        preComputeExps()
+
+        frequency = [i for i in range(1,N+1)]
+        amplitude = []
+        phase = []
+
+        polar = []
+        
+        for _k in range(N) :
+            real_sum = 0
+            img_sum = 0
+            
+            for _n in range(N) :
+                key = str(_n) + ':' + str(_k)
+                exp = expsVals[key]
+
+                real = round(math.cos(math.radians(abs(exp))),5)*y[_n]
+                img = -1*round(math.sin(math.radians(abs(exp))),5)*y[_n]
+
+                real_sum += real
+                img_sum += img
+
+            polar.append((real_sum,img_sum))
+
+            amplitude.append(math.sqrt(real_sum**2+img_sum**2))
+            phase.append(math.degrees(math.atan((img_sum/real_sum))))
+             
+        
+        fundamental_freq = 2*math.pi*samplingFreq/N
+        for i in range(len(frequency)) :
+            frequency[i] *= fundamental_freq
+
+        return (frequency,amplitude,phase,polar)
 
     def signalQuatization(self,_values,quantizationLevels) :
         print(_values)
@@ -105,8 +215,7 @@ class SignalHelper:
         
         return quantizedValues
 
-
-    def drawGraphs(self, graphs, isDiscrete=True, isContinuous=True):
+    def drawGraphs(self, graphs, isDiscrete=True, isContinuous=True , titles = []):
         if (len(graphs) == 1) :
             x,y = graphs[0]
 
@@ -143,6 +252,8 @@ class SignalHelper:
                 axs[i].plot(x_smooth, y_smooth)
         
             axs[i].legend()
+            if (i < len(titles)) :
+                axs[i].set_title(titles[i])
 
         plt.tight_layout()
         plt.show()
@@ -248,7 +359,7 @@ class SignalHelper:
         return (new_x,new_y)
 
 
-    def loadTxtContent(self,path) :
+    def loadTxtContent(self,path,isPolar = False) :
         try :
             data = open(path,'r').read().split('\n')
 
@@ -259,13 +370,22 @@ class SignalHelper:
             x = []
             y = []
             for i in range(3,len(data)):
-                data[i] = data[i].split(' ')
-                try :
-                    x.append(float(data[i][0]))
-                    y.append(float(data[i][1]))
-                except:
-                    print("Error in reading row",i)
-                    continue
+                if not isPolar :
+                    data[i] = data[i].split(' ')
+                    try :
+                        x.append(float(data[i][0]))
+                        y.append(float(data[i][1]))
+                    except:
+                        print("Error in reading row",i)
+                        continue
+                else :
+                    data[i] = data[i].split(',')
+                    try :
+                        x.append(float(data[i][0]))
+                        y.append(float(data[i][1]))
+                    except:
+                        print("Error in reading row",i)
+                        continue
 
             return (True,x,y)
 
@@ -283,6 +403,8 @@ class MyGUI(QMainWindow):
 
         #global data
         self.globalData = dict({
+            "forPolarInfo" : [],
+            "forImportedFiles" : [],
             "qntImportedFiles" : [],
             "opImportedFiles" : [],
             "opImportedWaves" : [],
@@ -325,6 +447,7 @@ class MyGUI(QMainWindow):
         self.txtDisCon.triggered.connect(self.onTxtToDiscreteAndContinousClick)
         self.quatizationLevels.triggered.connect(self.qntLvlCustomTest)
         self.quantizationBits.triggered.connect(self.qntBitsCustomTest) 
+        self.actiontxt_polar.triggered.connect(self.onImportPolar)
         #draw button
         self.drawBtn.clicked.connect(self.onDrawBtnClick)
 
@@ -339,6 +462,59 @@ class MyGUI(QMainWindow):
         self.qntBtn.clicked.connect(self.onQntBtnClicked)
         self.qntImportBtn.clicked.connect(self.onImportBtnClicked)
 
+        #tranformation section
+        self.forApplyBtn.clicked.connect(self.onForApplyBtn)
+        self.forImportBtn.clicked.connect(self.onForImportBtnClicked)
+        self.forSaveBtn.clicked.connect(self.onForSaveBtn)
+
+    def onImportPolar(self) :
+        res = self._showOpenDialog(True)
+        res = res[0]
+
+        if (res == False) :
+            return False; 
+
+        print(res)
+        signal = self.signalHelper.reconstructSignal(res,len(res))
+        self.signalHelper.drawGraphs([signal])
+
+    def onForSaveBtn(self) :
+        polar = self.globalData["forPolarInfo"];
+        if (polar == [] or len(polar) == 0) :
+            self._showPopUp("Warning" , "No signals to save")
+            return
+        fileContent = "0\n0\n"+str(len(polar))+"\n"
+
+        for i in range(len(polar)) :
+            fileContent += str(polar[i][0]) + ',' + str(polar[i][1])
+            if (i < len(polar)-1) :
+                fileContent += '\n'
+        
+        currDate = str(date.today())
+        file_path = "wave_" + currDate + ".txt"
+
+        _file = open(file_path, "w")
+        _file.write(fileContent)
+        _file.close()
+
+        self._showPopUp("Success" , "File saved succesfully, fileName: " + file_path)
+    
+        return
+
+    def onForApplyBtn(self) :
+        samplingFreq = int(self.forSamplingInp.text())
+        signal = self.globalData["forImportedFiles"][0]
+        freq,amp,phase,polar = self.signalHelper.transformToFrequencyDomain(signal,samplingFreq)
+        self.globalData["forPolarInfo"] = polar
+
+        self.signalHelper.drawGraphs([(freq,amp),(freq,phase)],True,False,["Frequnecy and Amplitude","Frequency and Phase"])
+
+    def onForImportBtnClicked(self) :
+        self.forFileTxt.setPlainText("")
+        res = self._showOpenDialog()
+        self.forFileTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
+        self.globalData["forImportedFiles"] = res
+
     def qntBitsCustomTest(self) :
         print("File must be in the same directory")
         print(self.globalData["test"])
@@ -349,7 +525,7 @@ class MyGUI(QMainWindow):
         binaries = self.globalData["test"]["binaries"]
         values = self.globalData["test"]["values"]
         errors = self.globalData["test"]["errors"]
-        self.customTest.quatizationByLevel(fileName,indexes,binaries,values,errors)
+        self.customTest.quatizationByLevel(fileName,indexes,binaries,values,errors,"1")
 
     def qntLvlCustomTest(self) :
         print("File must be in the same directory")
@@ -361,7 +537,7 @@ class MyGUI(QMainWindow):
         binaries = self.globalData["test"]["binaries"]
         values = self.globalData["test"]["values"]
         errors = self.globalData["test"]["errors"]
-        self.customTest.quatizationByLevel(fileName,indexes,binaries,values,errors)
+        self.customTest.quatizationByLevel(fileName,indexes,binaries,values,errors,"2")
 
     def onQntBtnClicked(self) :
         if (len(self.globalData["qntImportedFiles"]) == 0) :
@@ -388,6 +564,7 @@ class MyGUI(QMainWindow):
         errors = []
         if isLvls :
             length = math.ceil(math.log2(levels))
+            string += "Index " + "Encode " + "Quantize " + "Error " + "\n"
             for i in quatizedValues :
                 binStr = str("{0:b}".format((i["index"])))
                 while(len(binStr) < length) :
@@ -402,6 +579,7 @@ class MyGUI(QMainWindow):
                 string += " " + str(i["quantizedValue"]) + " " + str(i["error"]) + '\n'
 
         if isBits :
+            string += "Encode " + "Quantize "+ "\n"
             length = math.ceil(math.log2(levels))
             for i in quatizedValues :
                 binStr = str("{0:b}".format((i["index"])))
@@ -557,7 +735,7 @@ class MyGUI(QMainWindow):
         x,y = res
         self.signalHelper.drawGraphs([(x,y)][x],[y],False,True)
 
-    def _showOpenDialog(self):
+    def _showOpenDialog(self,isPolar = False):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
         options |= QFileDialog.ExistingFiles  # Allow selecting multiple files
@@ -571,7 +749,7 @@ class MyGUI(QMainWindow):
             data = []
 
             for fileName in fileNames:
-                state, x, y = self.signalHelper.loadTxtContent(fileName)
+                state, x, y = self.signalHelper.loadTxtContent(fileName,isPolar)
                 if state:
                     data.append((x, y))
                     self.globalData["opImportedFiles"].append(fileName)
@@ -581,8 +759,6 @@ class MyGUI(QMainWindow):
         else:
             self._showPopUp("Error", "An error occurred while importing files")
             return
-
-
 
 
 

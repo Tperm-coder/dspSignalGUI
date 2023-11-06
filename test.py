@@ -1,56 +1,49 @@
-def add_subtract_signals(self,signals,isAdd = True) :
+import math
+def reconstructSignal(signalPolar,samplingFreq) :
+        N = len(signalPolar)
+        def calc_exp(n,k,N) :
+            if (N == 0) :
+                print("Error dividing by zero")
+                return 0
+            res = -2 * 180 * k * n
+            res /= N
+            return res
+    
+        expsVals = {}
+        def preComputeExps() :
+            for _n in range(N):
+                for _k in range(N) :
+                    exp = calc_exp(_n,_k,N)
+                    key = str(_n) + ':' + str(_k)
+                    expsVals[key] = exp
 
-    new_signal = {};
+        preComputeExps()
 
-    for signal in signals :
-        x,y = signal
+        signal = []
+        for _k in range(N) :
+            _sum = 0
+            
+            for _n in range(N) :
+                key = str(_n) + ':' + str(_k)
+                exp = expsVals[key]
+
+                curReal = round(math.cos(math.radians(abs(exp))),5)
+                curImg =  round(math.sin(math.radians(abs(exp))),5)
+
+                valReal = signalPolar[_n][0]
+                valImg = signalPolar[_n][1]
 
 
-        n = len(x)
-        for i in range(len(x)) :
-            if str(x[i]) in new_signal :
-                if isAdd :
-                    new_signal[str(x[i])] += y[i]
+                if (curReal > 0 or curReal < 0) :
+                    # el imaginary hayteer wel real hayscal
+                    _sum += valReal*curReal
                 else :
-                    new_signal[str(x[i])] -= y[i]
-            else :
-                new_signal[str(x[i])] = y[i]
+                    # el imaginary hayb2a real wel real hayteer
+                    _sum += valImg*curImg*-1 # -1 34an el img yb2a real
+                    
+            signal.append(_sum/samplingFreq)
+        
+        return signal
 
 
-    x = []
-    y = []
-
-    for k, v in new_signal.items():
-        x.append(int(k))
-        y.append(v)
-
-    return (x,y)
-
-def signal_commulation(self,signal) :
-    x,y = signal
-
-    for i in range(1,len(x)) :
-        y[i] += y[i-1]
-    
-    return (x,y)
-
-def normalize_signal(self, signal, new_min , new_max) :
-    x,y = signal
-
-    curr_max = max(y)
-    curr_min = min(y)
-
-    normalize_func = lambda x : (((x-curr_min)/(curr_max-curr_min))*(new_max-new_min))+new_min
-
-    for i in range(len(y)) :
-        y[i] = normalize_func(y[i]);
-
-    return (x,y)
-
-    
-x = [
-    ([0,1,2,3],[10,10,10,10]),
-    ([0,10,20],[10,10,10])
-]  
-
-print(normalize([10,20,30,40,50],1,5))
+print(reconstructSignal([(6,0),(-2,2),(-2,0),(-2,-2)],4))
