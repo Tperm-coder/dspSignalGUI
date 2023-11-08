@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>841</width>
-    <height>952</height>
+    <width>874</width>
+    <height>819</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -765,7 +765,7 @@
       <x>420</x>
       <y>450</y>
       <width>371</width>
-      <height>281</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -790,7 +790,7 @@
     <property name="geometry">
      <rect>
       <x>-30</x>
-      <y>740</y>
+      <y>600</y>
       <width>871</width>
       <height>16</height>
      </rect>
@@ -803,7 +803,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>750</y>
+      <y>610</y>
       <width>251</width>
       <height>31</height>
      </rect>
@@ -825,7 +825,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>780</y>
+      <y>640</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -846,7 +846,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>850</y>
+      <y>710</y>
       <width>121</width>
       <height>23</height>
      </rect>
@@ -862,7 +862,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>810</y>
+      <y>670</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -878,7 +878,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>810</y>
+      <y>670</y>
       <width>131</width>
       <height>23</height>
      </rect>
@@ -891,7 +891,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>810</y>
+      <y>670</y>
       <width>131</width>
       <height>61</height>
      </rect>
@@ -901,7 +901,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>780</y>
+      <y>640</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -922,13 +922,57 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>850</y>
+      <y>710</y>
       <width>131</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
      <string>Save wave in polar form</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_16">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>640</y>
+      <width>281</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Edit wave: index,new phase,new amplitude</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>670</y>
+      <width>281</width>
+      <height>71</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="forApplyConstructBtn">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>750</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>construct</string>
     </property>
    </widget>
   </widget>
@@ -938,7 +982,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>841</width>
+     <width>874</width>
      <height>21</height>
     </rect>
    </property>

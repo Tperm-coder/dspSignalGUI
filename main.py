@@ -114,7 +114,7 @@ class SignalHelper:
 
 
                 if (curReal > 0 or curReal < 0) :
-                    # el imaginary hayteer wel real hayscal
+                    # el imaginary hayteer wel real hayscale
                     _sum += valReal*curReal
                 else :
                     # el imaginary hayb2a real wel real hayteer
@@ -258,11 +258,15 @@ class SignalHelper:
         plt.tight_layout()
         plt.show()
 
-    def buildWave(self, amplitude=1.0, frequency=1.0, phase=0.0 , isCos = False):
+    def buildWave(self, amplitude=1.0, frequency=1.0, phase=0.0 , isCos = False , x_values = []):
         if isCos : 
             phase += 90.0
-
-        x = np.linspace(0, 2 * np.pi, 1000)  
+        x = []
+        if (len(x_values) > 0) :
+            x = x_values
+            x = np.array(x)
+        else :
+            x = np.linspace(0, 2 * np.pi, 1000)  
         y = amplitude * np.sin(2 * np.pi * frequency * x + phase)
 
         return (x,y)
@@ -466,6 +470,111 @@ class MyGUI(QMainWindow):
         self.forApplyBtn.clicked.connect(self.onForApplyBtn)
         self.forImportBtn.clicked.connect(self.onForImportBtnClicked)
         self.forSaveBtn.clicked.connect(self.onForSaveBtn)
+        self.forApplyConstructBtn.clicked.connect(self.onForApplyConstructBtn)
+
+    def onForApplyConstructBtn2(self):
+        idxs = []
+        idxs_map = {}
+        newUpdates = str(self.textEdit.toPlainText()).split('\n')
+        try:
+            for i in range(len(newUpdates)) :
+                newUpdates[i] = newUpdates[i].split(',')
+
+                for j in range(len(newUpdates[i])) :
+                    newUpdates[i][j] = float(newUpdates[i][j])
+                
+                idxs_map[newUpdates[i][0]] = [newUpdates[i][1],newUpdates[i][2]] 
+                idxs.append(newUpdates[i][0])
+        except :
+            idxs = []
+            self._showPopUp("Error" , "Error in parsin the changes string")
+        
+
+
+        
+        print(newUpdates)
+        print(idxs_map)
+
+        signal = self.globalData["forImportedFiles"][0]
+        freq,amp,phase,polar = self.signalHelper.transformToFrequencyDomain(signal,len(signal[0]))
+
+        x_value = []
+        for i in range(len(freq)) :
+            x_value.append(i)
+        waves = []
+        for i in range(len(freq)) :
+            _amp = 0
+            phs = 0
+            if (i in idxs) :
+                phs = idxs_map[i][0]
+                _amp = idxs_map[i][1]
+
+            else :
+                _amp = amp[i]
+                phs = phase[i]
+
+            res = self.signalHelper.buildWave(_amp,freq[i],phs,False,x_value)
+            waves.append(res)
+        
+        
+
+        _wave = self.signalHelper.add_subtract_signals(waves)
+                
+        self.signalHelper.drawGraphs([_wave])
+        return
+    
+    def onForApplyConstructBtn(self):
+        idxs = []
+        idxs_map = {}
+        newUpdates = str(self.textEdit.toPlainText()).split('\n')
+        try:
+            for i in range(len(newUpdates)) :
+                newUpdates[i] = newUpdates[i].split(',')
+
+                for j in range(len(newUpdates[i])) :
+                    newUpdates[i][j] = float(newUpdates[i][j])
+                
+                idxs_map[int(newUpdates[i][0])] = [newUpdates[i][1],newUpdates[i][2]] 
+                idxs.append(int(newUpdates[i][0]))
+        except :
+            idxs = []
+            self._showPopUp("Error" , "Error in parsin the changes string")
+        
+
+
+        
+        print(newUpdates)
+        print(idxs_map)
+
+        signal = self.globalData["forImportedFiles"][0]
+        freq,amp,phase,polar = self.signalHelper.transformToFrequencyDomain(signal,len(signal[0]))
+
+        imgs = []
+        reals = []
+        for i in range(len(freq)) :
+            real = 0
+            img = 0
+            if (i in idxs) :
+                phs = idxs_map[i][0]
+                _amp = idxs_map[i][1]
+                real = _amp / math.sqrt((math.tan(phs*math.pi/180))**2 + 1)*-1
+                img = real * (math.tan(phs*math.pi/180))
+            else :
+                real = amp[i] / math.sqrt((math.tan(phase[i]*math.pi/180))**2 + 1)*-1
+                img = real * (math.tan(phase[i]*math.pi/180))
+
+                # res = self.buildWave(amp[i],freq[i],phase[i])
+
+            imgs.append(img)
+            reals.append(real)
+        
+
+        print("real-imgs\n",reals,'\n',imgs,'\n')
+                
+        wave = self.signalHelper.reconstructSignal((reals,imgs),len(freq))
+        self.signalHelper.drawGraphs([wave])
+        return
+        
 
     def onImportPolar(self) :
         res = self._showOpenDialog(True)
@@ -506,6 +615,11 @@ class MyGUI(QMainWindow):
         signal = self.globalData["forImportedFiles"][0]
         freq,amp,phase,polar = self.signalHelper.transformToFrequencyDomain(signal,samplingFreq)
         self.globalData["forPolarInfo"] = polar
+
+        print("freq : " , freq)
+        print("amp : " , amp)
+        print("phase : " , phase)
+        print("polar : " , polar)
 
         self.signalHelper.drawGraphs([(freq,amp),(freq,phase)],True,False,["Frequnecy and Amplitude","Frequency and Phase"])
 
