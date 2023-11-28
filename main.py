@@ -80,7 +80,53 @@ class SignalHelper:
     def __init__(self):
         pass
 
-    def calculate_dct(x_values, y_values, m):
+    def avgSignal(self,signal,windowSize) :
+        x,y = signal
+
+        avg = 0.0
+        newValues = []
+        for i in range(len(y)) :
+            avg = 0.0
+            for w in range(i-int(windowSize/2),i+int(windowSize/2)+1) :
+                if w < 0 or w >= len(y) :
+                    continue
+                avg += y[w];
+            newValues.append(avg/windowSize)
+        
+        return (x,newValues)
+
+    def foldSignal(self,signal):
+        x,y = signal
+        x = [*x]
+        y = [*y]
+        y.reverse()
+        return(x,y)
+
+    def delaySignal(self,signal,k) :
+        x,y = signal
+        x = [*x]
+        y = [*y]
+
+        for i in range(len(x)) :
+            x[i] += k
+
+        return (x,y)
+        
+    def computeFirstAndSecondDerivative(self,signal) :
+        x,InputSignal = signal
+        FirstDrev = []
+        SecondDrev = []
+        N = len(InputSignal)
+        last = 0
+        for i in range(N - 1):
+            FirstDrev.append(InputSignal[i] - last)
+            SecondDrev.append(InputSignal[i + 1] + last - InputSignal[i] - InputSignal[i])
+            last = InputSignal[i]
+
+        x.pop(0)
+        return [(x,FirstDrev),(x,SecondDrev)]
+
+    def calculate_dct(self,x_values, y_values, m ):
         # mean = np.mean(y_values)
         # y_values_centered = y_values - mean
 
@@ -105,7 +151,7 @@ class SignalHelper:
 
         return dct_values
 
-    def compute_dct(x_values,y_values , m):
+    def compute_dct(self,x_values,y_values , m):
         dct_coefficients = SignalHelper.calculate_dct(x_values, y_values, m)
         output = []
 
@@ -123,22 +169,25 @@ class SignalHelper:
 
         return output
 
-    def save_dct_output(dct_coefficients):
-        app = QApplication(sys.argv)  # Create a PyQt application instance (you should only create one per application)
+    def save_dct_output(self,dct_coefficients):
+        try :
+            app = QApplication(sys.argv)  
 
-        file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getSaveFileName(None, "Save DCT Coefficients", "",
-                                                   "Text Files (*.txt);;All Files (*)")
+            file_dialog = QFileDialog()
+            file_path, _ = file_dialog.getSaveFileName(None, "Save DCT Coefficients", "",
+                                                    "Text Files (*.txt);;All Files (*)")
 
-        if file_path:
-            with open(file_path, "w") as file:
-                for coef in dct_coefficients:
-                    file.write(str(coef) + "\n")
-            print("DCT coefficients saved successfully.")
-        else:
-            print("Save cancelled.")
+            if file_path:
+                with open(file_path, "w") as file:
+                    for coef in dct_coefficients:
+                        file.write(str(coef) + "\n")
+                print("DCT coefficients saved successfully.")
+            else:
+                print("Save cancelled.")
+        except :
+            print("An error occurred")
 
-    def remove_DC(x_values,y_values):
+    def remove_DC(self,x_values,y_values):
         sum = 0
         for i in range(len(y_values)):
             sum = sum + y_values[i]
@@ -148,6 +197,9 @@ class SignalHelper:
             y = y_values[n] - average
             new_y.append(y)
         filepath = 'DC_component_output.txt'
+        # Error is HEre -------------------------
+        SignalSamplesAreEqual(filepath, new_y)
+        # Error is HEre -------------------------
         print("Signal after removing DC component:")
         print(new_y)
         plt.plot(x_values, new_y)
@@ -157,7 +209,7 @@ class SignalHelper:
         plt.show()
         return
 
-    def reconstructSignal(signal,signalPolar,samplingFreq) :
+    def reconstructSignal(self,signalPolar,samplingFreq) :
         N = len(signalPolar[0])
         def calc_exp(n,k,N) :
             if (N == 0) :
@@ -231,7 +283,8 @@ class SignalHelper:
         amplitude = []
         phase = []
 
-        polar = []
+        polarReal = []
+        polarImg = []
         
         for _k in range(N) :
             real_sum = 0
@@ -247,7 +300,8 @@ class SignalHelper:
                 real_sum += real
                 img_sum += img
 
-            polar.append((real_sum,img_sum))
+            polarImg.append(img_sum)
+            polarReal.append(real_sum)
 
             amplitude.append(math.sqrt(real_sum**2+img_sum**2))
             phase.append(math.degrees(math.atan((img_sum/real_sum))))
@@ -257,7 +311,7 @@ class SignalHelper:
         for i in range(len(frequency)) :
             frequency[i] *= fundamental_freq
 
-        return (frequency,amplitude,phase,polar)
+        return (frequency,amplitude,phase,(polarReal,polarImg))
 
     def signalQuatization(self,_values,quantizationLevels) :
         print(_values)
@@ -441,7 +495,6 @@ class SignalHelper:
         
         return (new_x,new_y)
 
-
     def loadTxtContent(self,path,isPolar = False) :
         try :
             data = open(path,'r').read().split('\n')
@@ -490,6 +543,8 @@ class MyGUI(QMainWindow):
             "forImportedFiles" : [],
             "qntImportedFiles" : [],
             "opImportedFiles" : [],
+            "dctImportedFiles" : [],
+            "filterImportedFiles" : [],
             "opImportedWaves" : [],
             "ops" : {
                 "multiply" : "multiply",
@@ -555,6 +610,76 @@ class MyGUI(QMainWindow):
         self.dctImportBtn.clicked.connect(self.onDctImportBtn)
         self.dctApplyBtn.clicked.connect(self.onDctApplyBtn)
         self.dctRemove.clicked.connect(self.onDctRemove)
+
+
+        #filters Section
+        self.filImp.clicked.connect(self.onFilImp)
+        self.smoothApply.clicked.connect(self.onSmoothApply)
+        self.dctRemove.clicked.connect(self.onDctRemove)
+        self.firstAndSecDer.clicked.connect(self.onFirstAndSecDer)
+        self.delayApply.clicked.connect(self.onDelayApply)
+        self.foldApp.clicked.connect(self.onFoldApp)
+        self.foldAppAndSave.clicked.connect(self.onFoldAppAndSave)
+        self.RmvDCComp.clicked.connect(self.onRmvDCComp)
+
+    def onRmvDCComp(self) :
+        signal = self.globalData["filterImportedFiles"][0]
+        x,y = signal
+        x = [*x]
+        y = [*y]
+
+        freq,amp,phase,polar = self.signalHelper.transformToFrequencyDomain(signal,1)
+        self.globalData["forPolarInfo"] = polar
+        print("polar : " , polar)
+
+        polar[0][0] = 0
+        polar[1][0] = 0 
+
+        recSig = self.signalHelper.reconstructSignal(polar,len(signal))
+
+
+        self.signalHelper.drawGraphs([(x,y),recSig],True,True,["Original","After"])
+
+    def onFoldApp(self) :
+        signal = self.globalData["filterImportedFiles"][0]
+        sig = self.signalHelper.foldSignal(signal)
+        self.signalHelper.drawGraphs([signal,sig],True,True,[ "Original","Delayed"])
+
+    def onFoldAppAndSave(self) :
+        signal = self.globalData["filterImportedFiles"][0]
+        sig = self.signalHelper.foldSignal(signal)
+        self.signalHelper.drawGraphs([signal,sig],True,True,[ "Original","Delayed"])
+        self.globalData["filterImportedFiles"] = [sig]
+
+    def onDelayApply(self):
+        k = int(self.delayVal.text())
+        signal = self.globalData["filterImportedFiles"][0]
+        sig = self.signalHelper.delaySignal(signal,k)
+        self.signalHelper.drawGraphs([signal,sig],True,True,[ "Original","Delayed"])
+
+    def onFirstAndSecDer(self) :
+        signal = self.globalData["filterImportedFiles"][0]
+        x,y = signal
+        x = [*x]
+        y = [*y]
+        sigs = self.signalHelper.computeFirstAndSecondDerivative(signal)
+        self.signalHelper.drawGraphs([(x,y),*sigs],True,True,[ "Original","First Derivative" , "Second Derivative"])
+        print("Conv Test case passed successfully")
+
+    def onSmoothApply(self) :
+        windowSize = int(self.smoothWin.text())
+        signal = self.globalData["filterImportedFiles"][0]
+        avgSignal = self.signalHelper.avgSignal(signal,windowSize)
+        self.signalHelper.drawGraphs([signal,avgSignal],True,True,["Before", "After"])
+
+
+    def onFilImp(self) :
+        self.dctFileTxt.setPlainText("")
+        res = self._showOpenDialog()
+        self.filTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
+        self.globalData["filterImportedFiles"] = res
+
+
     def onDctApplyBtn(self):
         m_coefficent = int(self.dct.text())
         signal = self.globalData["dctImportedFiles"][0]
@@ -564,16 +689,18 @@ class MyGUI(QMainWindow):
         SignalHelper.save_dct_output(coeff)
 
 
-
-
     def onDctImportBtn(self) :
+        self.dctFileTxt.setPlainText("")
         res = self._showOpenDialog()
+        self.dctFileTxt.setPlainText (",".join(self.globalData["opImportedFiles"]))
         self.globalData["dctImportedFiles"] = res
+
     def onDctRemove(self):
         signal = self.globalData["dctImportedFiles"][0]
         x_values = signal[0]
         y_values = signal[1]
         SignalHelper.remove_DC(x_values, y_values)
+
     def onForApplyConstructBtn2(self):
         idxs = []
         idxs_map = {}

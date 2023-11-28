@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>872</width>
+    <width>1879</width>
     <height>1010</height>
    </rect>
   </property>
@@ -980,7 +980,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>790</y>
+      <y>780</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -1066,6 +1066,324 @@
      <string>Remove DC</string>
     </property>
    </widget>
+   <widget class="Line" name="line_5">
+    <property name="geometry">
+     <rect>
+      <x>930</x>
+      <y>0</y>
+      <width>16</width>
+      <height>951</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_12">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>10</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Adobe Fan Heiti Std B</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Signal filters</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="smoothWin">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>80</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_19">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>810</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Imported file name</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="filImp">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>120</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Import</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="filTxt">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>80</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_20">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>50</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Imported file name</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_21">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>50</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Smoothig window size</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="smoothApply">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>120</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Apply</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="firstAndSecDer">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>190</y>
+      <width>101</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Apply</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_22">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>160</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Sharpen Signal</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="delayApply">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>120</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Apply</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="delayVal">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>80</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>-999999</number>
+    </property>
+    <property name="maximum">
+     <number>999999</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_23">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>50</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Delay or advance Signal</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="foldApp">
+    <property name="geometry">
+     <rect>
+      <x>1180</x>
+      <y>190</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Apply</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_24">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>160</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Fold signal</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="foldAppAndSave">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>190</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Apply and save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="RmvDCComp">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>190</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Apply</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_25">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>160</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Remove DC component</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
@@ -1073,7 +1391,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>872</width>
+     <width>1879</width>
      <height>21</height>
     </rect>
    </property>
