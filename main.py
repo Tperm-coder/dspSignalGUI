@@ -6,11 +6,13 @@ import math
 from datetime import date
 from comparesignal2 import SignalSamplesAreEqual
 import sys
+from ConvTest import ConvTest
 
 
 class CustomTest : 
     def __init__(self):
         pass
+
     def quatizationByLevel(self,file_name,Your_IntervalIndices,Your_EncodedValues,Your_QuantizedValues,Your_SampledError,test):
         expectedIntervalIndices=[]
         expectedEncodedValues=[]
@@ -80,6 +82,27 @@ class SignalHelper:
     def __init__(self):
         pass
 
+    def convolve(signal_x,signal_y,kernel_x,kernel_y):
+        signal_len = len(signal_x)
+        kernel_len = len(kernel_x)
+        result_len = signal_len + kernel_len - 1
+        result = [0] * result_len
+
+        for i in range(result_len):
+            for j in range(max(0, i - kernel_len + 1), min(i + 1, signal_len)):
+                result[i] += signal_y[j] * kernel_y[i - j]
+
+        len1 = len(signal_y)
+        len2 = len(kernel_y)
+        convolved = np.zeros(len1 + len2 - 1)
+        newmin = int(min(signal_x) + min(kernel_x))
+        newmax = int(max(signal_x) + max(kernel_x))
+        new_indices = list(range(newmin, newmax + 1))
+        for i in range(len1):
+            for j in range(len2):
+                convolved[i + j] += signal_y[i] * kernel_y[j]
+
+        ConvTest(new_indices,result)
     def avgSignal(self,signal,windowSize) :
         x,y = signal
 
@@ -621,6 +644,25 @@ class MyGUI(QMainWindow):
         self.foldApp.clicked.connect(self.onFoldApp)
         self.foldAppAndSave.clicked.connect(self.onFoldAppAndSave)
         self.RmvDCComp.clicked.connect(self.onRmvDCComp)
+
+        #Convolution Section
+        self.convolveBtn.clicked.connect(self.onConvolvePressed)
+        self.convolveImpBtn.clicked.connect(self.onConvolveImpPressed)
+
+    def onConvolveImpPressed(self):
+        res= self._showOpenDialog()
+        self.globalData["convolveImportedFiles"] = res
+        signal_x= res[0][0]
+        signal_y= res[0][1]
+        kernel_x= res[1][0]
+        kernel_y= res[1][1]
+        SignalHelper.convolve(signal_x,signal_y,kernel_x,kernel_y)
+
+
+
+
+    def onConvolvePressed(self):
+        print("apply")
 
     def onRmvDCComp(self) :
         signal = self.globalData["filterImportedFiles"][0]
