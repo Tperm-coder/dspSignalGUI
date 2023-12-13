@@ -4,10 +4,13 @@ from PyQt5 import uic
 import numpy as np
 import math
 from datetime import date
+
+import CompareSignal
 from comparesignal2 import SignalSamplesAreEqual
 import sys
 from ConvTest import ConvTest
-
+import cmath
+from CompareSignal import Compare_Signals
 
 class CustomTest : 
     def __init__(self):
@@ -81,6 +84,101 @@ class CustomTest :
 class SignalHelper:
     def __init__(self):
         pass
+
+    def dft(signal_in_time_domain):
+        # arguments: one signal
+        # return: [[amp, phase shift]]
+
+        signals_in_freq_domain = SignalHelper.convert_to_frequency_domain(signal_in_time_domain)
+        amp_shift = []
+        for signal in signals_in_freq_domain:
+            # Amplitude = sqrt (real number^2 + coefficient of imaginary number ^ 2)
+            amplitude = abs(signal)
+            # Phase shift = inverse tan (coefficient of imaginary number / real number)
+            phase_shift = cmath.phase(signal)
+            amp_shift.append([amplitude, phase_shift])
+        return amp_shift
+
+    def idft(signals_in_frequency_domain):
+        # arguments: [[amp, phase shift]]
+        # return: signal
+        signals_in_time_domain = SignalHelper.convert_to_time_domain(signals_in_frequency_domain)
+        reconstructed_signal = []
+        for i in range(len(signals_in_time_domain)):
+            reconstructed_signal.append([i, signals_in_time_domain[i]])
+        return reconstructed_signal
+
+    def convert_to_frequency_domain(signals):
+        # x(k)= 0, n-1 ∑ x(n) * e^(( -J * 2 * pi * k * n )/N)
+        signals = signals[1]
+        signals_in_freq_domain = [0] * len(signals)
+        for k, x_k in enumerate(signals_in_freq_domain):
+            tmp = 0
+            for n, x_n in signals:
+                tmp += x_n * cmath.exp(-2j * math.pi * k * n / len(signals))
+            signals_in_freq_domain[k] = tmp
+        return signals_in_freq_domain
+
+    def convert_to_time_domain(signals):
+        # Convert amplitude and phase shift to signal in frequency domain X(k)
+        # X(k) = A Cos θ + J sin θ
+        for i in range(len(signals)):
+            A = signals[i][0]
+            phase = signals[i][1]
+            signals[i] = [i, cmath.rect(A, phase)]
+        # Initialize signal in a time domain list
+        signals_in_time_domain = [0] * len(signals)
+        # Convert frequency domain to time domain
+        for n, x_n in enumerate(signals_in_time_domain):
+            tmp = 0
+            # Calculate X(n)= 1/N ∑ x(k) * e^(( J * 2 * pi * k * n )/N)
+            for k, x_k in signals:
+                tmp += x_k * cmath.exp(2j * math.pi * k * n / len(signals))
+            signals_in_time_domain[n] = tmp.real._round_(3) / len(signals)
+        return signals_in_time_domain
+    def normalizedCrossCorrelation(signal1, signal2):
+        f1 = SignalHelper.dft(signal1)
+        f2 = SignalHelper.dft(signal2)
+        x1_indices = []
+        x1Squared = []
+        x2Squared = []
+
+        for i in range(len(signal1)):
+            x1_indices.append(i)
+            x1Squared.append(signal1[i][1] ** 2)
+            x2Squared.append(signal2[i][1] ** 2)
+
+        x1sqrSum = np.sum(x1Squared)
+        x2sqrSum = np.sum(x2Squared)
+
+        p12 = (1 / len(x1_indices)) * (math.sqrt(x1sqrSum * x2sqrSum))
+
+        for i in range(len(f1)):
+            A = f1[i][0]
+            phase = f1[i][1]
+            signal1[i] = [i, cmath.rect(A, phase)]
+
+        for i in range(len(f2)):
+            A = f2[i][0]
+            phase = f2[i][1]
+            signal2[i] = [i, cmath.rect(A, phase)]
+
+        cross_correlation_freq = np.conjugate([val[1] for val in signal1]) * [val[1] for val in signal2]
+
+        tmp = []
+        for s in cross_correlation_freq:
+            amps = abs(s)
+            phases = cmath.phase(s)
+            tmp.append([amps, phases])
+
+        cross_correlation_time = SignalHelper.idft(tmp)
+
+        normalizedSignal = [(1 / len(cross_correlation_time)) * s[1] / p12 for s in cross_correlation_time]
+        # CompareSignal.Compare_Signals()
+        return [s[0] for s in cross_correlation_time], normalizedSignal
+
+
+
 
     def convolve(signal_x,signal_y,kernel_x,kernel_y):
         signal_len = len(signal_x)
@@ -648,6 +746,19 @@ class MyGUI(QMainWindow):
         #Convolution Section
         self.convolveBtn.clicked.connect(self.onConvolvePressed)
         self.convolveImpBtn.clicked.connect(self.onConvolveImpPressed)
+
+        #Correlation
+        self.correlateImpBtn.clicked.connect(self.onCorrelateImpPressed)
+
+
+    def onCorrelateImpPressed(self):
+        res= self._showOpenDialog()
+        self.globalData["correlateImportedFiles"] = res
+        signal_x= res[0][0]
+        signal_y= res[0][1]
+        kernel_x= res[1][0]
+        kernel_y= res[1][1]
+        SignalHelper.normalizedCrossCorrelation(res[0],res[1])
 
     def onConvolveImpPressed(self):
         res= self._showOpenDialog()
