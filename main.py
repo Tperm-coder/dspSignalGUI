@@ -339,7 +339,7 @@ class SignalHelper:
             res = -2 * 180 * k * n
             res /= N
             return res
-    
+
         expsVals = {}
         def preComputeExps() :
             for _n in range(N):
