@@ -85,6 +85,90 @@ class SignalHelper:
     def __init__(self):
         pass
 
+    def fastConvolution(signal1, signal2):
+        # Apply zero paddings for each signal
+        l1 = len(signal1)
+        l2 = len(signal2)
+        last1 = signal1[l1 - 1][0] + 1
+        last2 = signal2[l2 - 1][0] + 1
+
+        for i in range(l2 - 1):
+            signal1.append([last1 + i, 0])
+        for i in range(l1 - 1):
+            signal2.append([last2 + i, 0])
+
+        for i in range(l1 + l2 - 1):
+            signal2[i][0] = i
+            signal1[i][0] = i
+
+        # Compute the Discrete Fourier Transform (DFT) of signal1 and signal2
+        f1 = SignalHelper.dft(signal1)
+        f2 = SignalHelper.dft(signal2)
+
+        # Convert amplitude and phase to rectangular form for signal1
+        for i in range(len(f1)):
+            A = f1[i][0]
+            phase = f1[i][1]
+            signal1[i][1] = cmath.rect(A, phase)
+
+        # Convert amplitude and phase to rectangular form for signal2
+        for i in range(len(f2)):
+            A = f2[i][0]
+            phase = f2[i][1]
+            signal2[i][1] = cmath.rect(A, phase)
+
+        # Compute the cross-correlation in the frequency domain
+        cross_correlation_freq = np.multiply([val[1] for val in signal1], [val[1] for val in signal2])
+        # Convert the cross-correlation to amplitude and phase
+        tmp = []
+        for s in cross_correlation_freq:
+            amps = abs(s)
+            phases = cmath.phase(s)
+            tmp.append([amps, phases])
+
+        # Compute the Inverse Discrete Fourier Transform (IDFT) to get the cross-correlation in time domain
+        cross_correlation_time = SignalHelper.idft(tmp)
+
+        start_index = -(l1 - 1)
+
+        output_index = np.arange(start_index, start_index + len(cross_correlation_time)) + 1
+
+        # Return the indices and correlated signal
+
+        ConvTest(output_index,[val[1] for val in cross_correlation_time])
+
+        return output_index, [val[1] for val in cross_correlation_time]
+    def correlation(signal1, signal2):
+        # Ensure that signals have the same length
+        assert len(signal1) == len(signal2), "Input signals must have the same length"
+
+        # Calculate the summation squares for signal 1
+        sum_squares_x = np.sum(np.square(signal1))
+
+        # Initialize lists to store the indices and correlation values for each circular shift
+        indices = []
+        correlations = []
+        N = len(signal1)
+
+        # Calculate correlation for each circular shift
+        for shift in range(N):
+            # Circular shift the second signal manually
+            shifted_signal2 = signal2[shift:] + signal2[:shift]
+            # Calculate the summation squares for the circular shifted signal 2
+            sum_squares_y = np.sum(np.square(shifted_signal2))
+            # Calculate p for the circular shifted signal 2
+            p = np.sqrt(sum_squares_x * sum_squares_y) / N
+            # Calculate r for the circular shifted signal 2
+            r = np.sum(np.multiply(signal1, shifted_signal2))
+            # Divide by N
+            r /= N
+            # Calculate correlation and append to the lists
+            corr = r / p
+            correlations.append(corr)
+            indices.append(shift)
+
+        CompareSignal.Compare_Signals('./CorrOutput.txt',indices,correlations)
+        return indices, correlations
     def dft(signal_in_time_domain):
         # arguments: one signal
         # return: [[amp, phase shift]]
@@ -110,7 +194,7 @@ class SignalHelper:
 
     def convert_to_frequency_domain(signals):
         # x(k)= 0, n-1 ∑ x(n) * e^(( -J * 2 * pi * k * n )/N)
-        signals = signals[1]
+        # signals = signals[1]
         signals_in_freq_domain = [0] * len(signals)
         for k, x_k in enumerate(signals_in_freq_domain):
             tmp = 0
@@ -134,8 +218,9 @@ class SignalHelper:
             # Calculate X(n)= 1/N ∑ x(k) * e^(( J * 2 * pi * k * n )/N)
             for k, x_k in signals:
                 tmp += x_k * cmath.exp(2j * math.pi * k * n / len(signals))
-            signals_in_time_domain[n] = tmp.real._round_(3) / len(signals)
+            signals_in_time_domain[n] = tmp.real.__round__(3) / len(signals)
         return signals_in_time_domain
+
     def normalizedCrossCorrelation(signal1, signal2):
         f1 = SignalHelper.dft(signal1)
         f2 = SignalHelper.dft(signal2)
@@ -172,11 +257,9 @@ class SignalHelper:
             tmp.append([amps, phases])
 
         cross_correlation_time = SignalHelper.idft(tmp)
-
         normalizedSignal = [(1 / len(cross_correlation_time)) * s[1] / p12 for s in cross_correlation_time]
-        # CompareSignal.Compare_Signals()
-        return [s[0] for s in cross_correlation_time], normalizedSignal
 
+        return normalizedSignal
 
 
 
@@ -648,6 +731,19 @@ class SignalHelper:
 
         except :
             return (False,[],[])
+    def convertToTupleForm(signal_x,signal_y):
+        result = list(zip(signal_x, signal_y))
+        return  result
+    def convertToArrForm(signal_x,signal_y):
+        arr= []
+        for  i in range(len(signal_y)):
+            list = []
+            list.append(signal_x[i])
+            list.append(signal_y[i])
+            arr.append(list)
+        return arr
+
+
 
 class MyGUI(QMainWindow):
 
@@ -748,16 +844,79 @@ class MyGUI(QMainWindow):
         self.convolveImpBtn.clicked.connect(self.onConvolveImpPressed)
 
         #Correlation
+        self.slowCorrelateImpBtn.clicked.connect(self.onSlowCorrelateImpPressed)
+
+        #Fast Correlation
         self.correlateImpBtn.clicked.connect(self.onCorrelateImpPressed)
 
+        #Fast Convolution
+        self.fastConvolutionImpBtn.clicked.connect(self.onFastConvolveImpPressed)
+
+
+    def onFastConvolveImpPressed(self):
+        res= self._showOpenDialog()
+        self.globalData['fastConvolveImportedFiles']= res
+        signal_x = res[0][0]
+        signal_y = res[0][1]
+        kernel_x = res[1][0]
+        kernel_y = res[1][1]
+        sig1=  SignalHelper.convertToArrForm(signal_x,signal_y)
+        sig2=  SignalHelper.convertToArrForm(kernel_x,kernel_y)
+
+        SignalHelper.fastConvolution(sig1,sig2)
+
+    def onSlowCorrelateImpPressed(self):
+        res= self._showOpenDialog()
+        self.globalData['slowCorrelateImportedFiles']= res
+        signal_x = res[0][0]
+        signal_y = res[0][1]
+        kernel_x = res[1][0]
+        kernel_y = res[1][1]
+        SignalHelper.correlation(signal_y,kernel_y)
 
     def onCorrelateImpPressed(self):
-        res= self._showOpenDialog()
+        res = self._showOpenDialog()
         self.globalData["correlateImportedFiles"] = res
-        signal_x= res[0][0]
-        signal_y= res[0][1]
-        kernel_x= res[1][0]
-        kernel_y= res[1][1]
+        signal_x = res[0][0]
+        signal_y = res[0][1]
+        kernel_x = res[1][0]
+        kernel_y = res[1][1]
+
+        sig1 = []
+        sig2 = []
+
+        for i in range(len(res[0][0])):
+            sig1.append((res[0][0][i], res[0][1][i]))
+
+        for i in range(len(res[1][0])):
+            sig2.append((res[1][0][i], res[1][1][i]))
+
+        print(sig1, sig2)
+
+        ress = SignalHelper.normalizedCrossCorrelation(sig1, sig2)
+        x = []
+
+        sigg = []
+
+        _str = "0\n1\n" + str(len(ress)) + '\n'
+
+        for i in range(len(ress)):
+            sigg.append((i, ress[i]))
+            x.append(i)
+            _str += str(i) + ' ' + str(ress[i]) + '\n'
+
+        file = open("./task8.txt", 'w')
+        file.write(_str)
+        file.close()
+        CompareSignal.Compare_Signals('./CorrOutput.txt', x, ress)
+
+        # print([res[0], res[1], sigg])
+
+        # self.signalHelper.drawGraphs([res[0], res[1], (x, ress)], True, True, ["Signal 1", "Signal 2", "Corellation"])
+
+        # print(_str)
+
+
         SignalHelper.normalizedCrossCorrelation(res[0],res[1])
 
     def onConvolveImpPressed(self):

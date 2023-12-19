@@ -1400,8 +1400,8 @@
    <widget class="QLabel" name="ampInpLabel_18">
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>230</y>
+      <x>1050</x>
+      <y>240</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -1449,7 +1449,7 @@
     <property name="geometry">
      <rect>
       <x>940</x>
-      <y>340</y>
+      <y>450</y>
       <width>871</width>
       <height>16</height>
      </rect>
@@ -1461,8 +1461,8 @@
    <widget class="QLabel" name="ampInpLabel_26">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>410</y>
+      <x>1470</x>
+      <y>490</y>
       <width>261</width>
       <height>31</height>
      </rect>
@@ -1483,14 +1483,84 @@
    <widget class="QPushButton" name="correlateImpBtn">
     <property name="geometry">
      <rect>
-      <x>1260</x>
-      <y>520</y>
+      <x>1500</x>
+      <y>570</y>
       <width>191</width>
       <height>71</height>
      </rect>
     </property>
     <property name="text">
      <string>Correlate</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_27">
+    <property name="geometry">
+     <rect>
+      <x>1030</x>
+      <y>490</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Adobe Fan Heiti Std B</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Correlation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="slowCorrelateImpBtn">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>570</y>
+      <width>191</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Correlate</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ampInpLabel_28">
+    <property name="geometry">
+     <rect>
+      <x>1500</x>
+      <y>230</y>
+      <width>261</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Adobe Fan Heiti Std B</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string> Fast Convolution</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="fastConvolutionImpBtn">
+    <property name="geometry">
+     <rect>
+      <x>1480</x>
+      <y>280</y>
+      <width>191</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Fast Convolution</string>
     </property>
    </widget>
   </widget>
